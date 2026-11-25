@@ -52,11 +52,11 @@ with status `400` (validation), `404` (not found) or `500` (unexpected).
 | Method | Path                 | Description                                                              |
 |--------|----------------------|--------------------------------------------------------------------------|
 | POST   | `/api/expenses`      | Create (201 + created expense)                                           |
-| GET    | `/api/expenses`      | List; filters `category`, `from`, `to`; sorted by date desc, id desc     |
+| GET    | `/api/expenses`      | List; filters `category`, `from`, `to` (when both `from` and `to` are supplied, `from` must be on/before `to`; invalid ranges return `400 Validation failed` with a detail on field `from`); sorted by date desc, id desc     |
 | GET    | `/api/expenses/:id`  | Get one (404 if missing)                                                 |
 | PUT    | `/api/expenses/:id`  | Full update (404 if missing)                                             |
 | DELETE | `/api/expenses/:id`  | Delete (204; 404 if missing)                                             |
-| GET    | `/api/summary`       | `{ total, count, byCategory: [{ category, total, count }] }`, same filters |
+| GET    | `/api/summary`       | `{ total, count, byCategory: [{ category, total, count }] }`, same filters (when both `from` and `to` are supplied, `from` must be on/before `to`; invalid ranges return `400 Validation failed` with a detail on field `from`) |
 | GET    | `/api/health`        | `{ "status": "ok" }`                                                     |
 
 Expense fields: `title` (1-100 chars), `amount` (> 0, max 2 decimals, JSON number), `category`
