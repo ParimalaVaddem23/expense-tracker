@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "activeProfile": "Parimala",
+  "profiles": {
+    "Parimala": {
+      "provider": "ai-run-sso",
+      "apiKey": "sso-provided",
+      "baseUrl": "https://codemie.lab.epam.com/code-assistant-api",
+      "model": "claude-haiku-5-5",
+      "haikuModel": "claude-haiku-5-5",
+      "sonnetModel": "claude-sonnet-5-5",
+      "opusModel": "claude-opus-5-5",
+      "name": "Parimala"
+    }
+  },
+  "workspace": {
+    "codeMieUrl": "https://codemie.lab.epam.com",
+    "codeMieProject": "codemie_project"
+  }
+}
