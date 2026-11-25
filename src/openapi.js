@@ -15,8 +15,8 @@ const idParam = {
 
 const filterParams = [
   { name: 'category', in: 'query', required: false, schema: { type: 'string', enum: CATEGORIES } },
-  { name: 'from', in: 'query', required: false, schema: { type: 'string', format: 'date' }, description: 'Inclusive start date (YYYY-MM-DD)' },
-  { name: 'to', in: 'query', required: false, schema: { type: 'string', format: 'date' }, description: 'Inclusive end date (YYYY-MM-DD)' },
+  { name: 'from', in: 'query', required: false, schema: { type: 'string', format: 'date' }, description: 'Inclusive start date (YYYY-MM-DD). If both "from" and "to" are provided, "from" must be on or before "to" (otherwise 400 validation error).' },
+  { name: 'to', in: 'query', required: false, schema: { type: 'string', format: 'date' }, description: 'Inclusive end date (YYYY-MM-DD). If both "from" and "to" are provided, "from" must be on or before "to" (otherwise 400 validation error).' },
 ];
 
 const jsonBody = (ref) => ({ required: true, content: { 'application/json': { schema: { $ref: ref } } } });
