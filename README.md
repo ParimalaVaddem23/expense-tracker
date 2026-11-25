@@ -64,6 +64,11 @@ Expense fields: `title` (1-100 chars), `amount` (> 0, max 2 decimals, JSON numbe
 `note` (optional, max 255). Responses also include `id`, `created_at`, `updated_at`.
 `byCategory` lists only categories that have at least one matching expense (highest total first).
 
+### Date filter constraint
+For list (`GET /api/expenses`) and summary (`GET /api/summary`) endpoints, `from` and `to` are optional
+`YYYY-MM-DD` query parameters. When both are supplied, `from` must be on/before `to`. If `from` is after `to`,
+the API responds with `400` and the standard error shape.
+
 ## Test-data endpoints
 Enabled only when `NODE_ENV !== "production"`; they return 404 otherwise.
 
@@ -76,6 +81,21 @@ Elements carry the `data-testid` attributes listed in the requirements. Amounts 
 numbers with two decimals (e.g. `12.50`, no currency symbol). `form-error-<field>` elements (`title`, `amount`,
 `category`, `date`, `note`) are always in the DOM but hidden until they have a message. Per-category summary
 items use the category name as-is, e.g. `summary-category-Food`. Delete uses `window.confirm`.
+
+## Running Playwright E2E tests locally
+Playwright end-to-end tests run the app with `NODE_ENV=test` and use a separate SQLite database file:
+`DB_PATH=./db/expenses.test.db` (so they do not touch your development DB).
+
+On first run, Playwright may need to download browser binaries and OS dependencies:
+```bash
+npx playwright install --with-deps
+```
+
+Then run the tests using your project’s test command (see `package.json`). If you need to run them manually,
+make sure the environment is set to use the test DB, for example:
+```bash
+NODE_ENV=test DB_PATH=./db/expenses.test.db npm test
+```
 
 ## Project structure
 ```
