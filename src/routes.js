@@ -58,11 +58,11 @@ function createRouter(repo) {
   r.get('/health', (req, res) => res.json({ status: 'ok' }));
 
   // Auth routes under /api/auth/*
-  r.post('/auth/register', validate(registerSchema), async (req, res, next) => {
+  r.post('/auth/register', validate(registerSchema), (req, res, next) => {
     try {
       const { email, password } = req.valid.body;
-      const passwordHash = await bcrypt.hash(password, 10);
-      const user = await repo.createUser({ email, passwordHash });
+      const passwordHash = bcrypt.hashSync(password, 10);
+      const user = repo.createUser({ email, passwordHash });
 
       const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
         algorithm: 'HS256',
@@ -70,6 +70,7 @@ function createRouter(repo) {
         subject: String(user.id),
       });
 
+      // Jira/plan implies login cookie should be set on successful registration
       setAuthCookie(req, res, token);
       return res.status(201).json({ id: user.id, email: user.email });
     } catch (err) {
@@ -80,12 +81,12 @@ function createRouter(repo) {
     }
   });
 
-  r.post('/auth/login', validate(loginSchema), async (req, res, next) => {
+  r.post('/auth/login', validate(loginSchema), (req, res, next) => {
     try {
       const { email, password } = req.valid.body;
-      const user = await repo.getUserByEmail(email);
+      const user = repo.findUserByEmail(email);
 
-      const ok = user && (await bcrypt.compare(password, user.passwordHash));
+      const ok = user && bcrypt.compareSync(password, user.passwordHash);
       if (!ok) {
         return res.status(401).json({ error: 'Unauthorized', message: 'Invalid email or password' });
       }
@@ -108,7 +109,7 @@ function createRouter(repo) {
 
   r.get('/auth/me', authRequired, (req, res) => {
     if (legacyUserBlocked(req.user)) {
-      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
     return res.json({ id: req.user.id, email: req.user.email });
   });
