@@ -3,6 +3,11 @@
 body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
 main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
 .top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.top__user { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:.95rem; }
+.top__user strong { color:var(--ink); font-weight:600; }
+.top__user a, .top__user button { font:inherit; color:var(--accent); background:none; border:0; padding:0; cursor:pointer; text-decoration:none; }
+.top__user a:hover, .top__user button:hover { text-decoration:underline; }
+
 h1 { font-size:1.6rem; margin:0; }
 h2 { font-size:1.1rem; margin:0 0 12px; }
 .summary { margin:20px 0; }
@@ -11,6 +16,16 @@ h2 { font-size:1.1rem; margin:0 0 12px; }
 .chips { list-style:none; display:flex; flex-wrap:wrap; gap:8px; padding:0; margin:0; }
 .chips li { background:#e6f4f1; color:#0b514b; padding:4px 10px; border-radius:999px; font-size:.9rem; }
 .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+
+/* Auth (login) page */
+.auth { max-width:420px; margin:40px auto 0; }
+.auth .card { margin-bottom:0; }
+.auth__actions { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+
+/* Messages */
+.notice { color:var(--accent); margin:10px 0 0; }
+.error { color:var(--danger); margin:10px 0 0; }
+
 .form { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; align-items:end; }
 .form .wide { grid-column:1 / -1; }
 label { display:flex; flex-direction:column; gap:4px; font-size:.9rem; color:var(--muted); }
@@ -20,7 +35,6 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline:2px so
 button { cursor:pointer; }
 button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
 button.danger { color:var(--danger); }
-.error { color:var(--danger); margin:10px 0 0; }
 table { width:100%; border-collapse:collapse; margin-top:16px; }
 th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
 th { font-weight:600; color:var(--muted); font-size:.9rem; }
