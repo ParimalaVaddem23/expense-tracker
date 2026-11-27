@@ -3,13 +3,20 @@ const path = require('path');
 const { createDb } = require('./db');
 const { createRepo } = require('./repo');
 const { createApp } = require('./app');
-const { config, validateConfig } = require('./config');
+const { getConfigFromEnv, validateConfig } = require('./config');
 
-validateConfig();
+const config = getConfigFromEnv();
+validateConfig(config);
 
-const PORT = Number(process.env.PORT) || 3000;
-const DB_PATH =
-  config.DB_PATH || process.env.DB_PATH || path.join(__dirname, '..', 'data', 'expenses.db');
+if (!config.JWT_SECRET || config.JWT_SECRET.length < 16) {
+  // Refuse to start if the JWT secret is missing or too short.
+  // (Length threshold is a reasonable minimum to avoid trivial secrets.)
+  throw new Error('Invalid configuration: JWT_SECRET is required and must be at least 16 characters.');
+}
+
+const PORT = Number(config.PORT) || 3000;
+const DB_PATH = config.DB_PATH || path.join(__dirname, '..', 'data', 'expenses.db');
+
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 const app = createApp(createRepo(createDb(DB_PATH)));
