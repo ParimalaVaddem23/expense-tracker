@@ -1,6 +1,6 @@
 const { DEFAULT_CATEGORIES } = require('./db');
 
-const BASE = `SELECT e.id, e.amount, e.category_id, c.name AS category, e.description, e.expense_date
+const BASE = `SELECT e.id, e.user_id, e.amount, e.category_id, c.name AS category, e.description, e.expense_date
               FROM expenses e JOIN categories c ON c.id = e.category_id`;
 const SORTS = {
   date_desc: 'e.expense_date DESC, e.id DESC',
@@ -12,6 +12,7 @@ const SORTS = {
 const toExpense = (r) =>
   r && {
     id: r.id,
+    userId: r.user_id,
     amount: r.amount,
     categoryId: r.category_id,
     category: r.category,
@@ -20,36 +21,57 @@ const toExpense = (r) =>
   };
 
 function createRepo(db) {
-  function getExpense(id) {
-    return toExpense(db.prepare(`${BASE} WHERE e.id = ?`).get(id)) || null;
+  function createUser({ email, passwordHash }) {
+    const info = db
+      .prepare('INSERT INTO users(email, password_hash) VALUES (?, ?)')
+      .run(email, passwordHash);
+    return findUserById(info.lastInsertRowid);
   }
 
-  function listExpenses({ category, from, to, sort = 'date_desc' } = {}) {
-    const where = [];
-    const params = [];
+  function findUserByEmail(email) {
+    return db
+      .prepare('SELECT id, email, password_hash AS passwordHash FROM users WHERE email = ?')
+      .get(email) || null;
+  }
+
+  function findUserById(id) {
+    return db
+      .prepare('SELECT id, email, password_hash AS passwordHash FROM users WHERE id = ?')
+      .get(id) || null;
+  }
+
+  function getExpense(userId, id) {
+    return toExpense(db.prepare(`${BASE} WHERE e.user_id = ? AND e.id = ?`).get(userId, id)) || null;
+  }
+
+  function listExpenses(userId, { category, from, to, sort = 'date_desc' } = {}) {
+    const where = ['e.user_id = ?'];
+    const params = [userId];
     if (category) { where.push('e.category_id = ?'); params.push(category); }
     if (from) { where.push('e.expense_date >= ?'); params.push(from); }
     if (to) { where.push('e.expense_date <= ?'); params.push(to); }
-    const sql = `${BASE}${where.length ? ' WHERE ' + where.join(' AND ') : ''} ORDER BY ${SORTS[sort] || SORTS.date_desc}`;
+    const sql = `${BASE} WHERE ${where.join(' AND ')} ORDER BY ${SORTS[sort] || SORTS.date_desc}`;
     return db.prepare(sql).all(...params).map(toExpense);
   }
 
-  function createExpense(d) {
+  function createExpense(userId, d) {
     const info = db
-      .prepare('INSERT INTO expenses(amount, category_id, description, expense_date) VALUES (?, ?, ?, ?)')
-      .run(d.amount, d.categoryId, d.description ?? '', d.expenseDate);
-    return getExpense(info.lastInsertRowid);
+      .prepare('INSERT INTO expenses(user_id, amount, category_id, description, expense_date) VALUES (?, ?, ?, ?, ?)')
+      .run(userId, d.amount, d.categoryId, d.description ?? '', d.expenseDate);
+    return getExpense(userId, info.lastInsertRowid);
   }
 
-  function updateExpense(id, d) {
+  function updateExpense(userId, id, d) {
     const info = db
-      .prepare('UPDATE expenses SET amount = ?, category_id = ?, description = ?, expense_date = ? WHERE id = ?')
-      .run(d.amount, d.categoryId, d.description ?? '', d.expenseDate, id);
-    return info.changes ? getExpense(id) : null;
+      .prepare(
+        'UPDATE expenses SET amount = ?, category_id = ?, description = ?, expense_date = ? WHERE user_id = ? AND id = ?'
+      )
+      .run(d.amount, d.categoryId, d.description ?? '', d.expenseDate, userId, id);
+    return info.changes ? getExpense(userId, id) : null;
   }
 
-  function deleteExpense(id) {
-    return db.prepare('DELETE FROM expenses WHERE id = ?').run(id).changes > 0;
+  function deleteExpense(userId, id) {
+    return db.prepare('DELETE FROM expenses WHERE user_id = ? AND id = ?').run(userId, id).changes > 0;
   }
 
   function listCategories() {
@@ -65,15 +87,15 @@ function createRepo(db) {
     return { id: Number(info.lastInsertRowid), name };
   }
 
-  function summary(month) {
+  function summary(userId, month) {
     const byCategory = db
       .prepare(
         `SELECT c.name AS category, ROUND(SUM(e.amount), 2) AS total, COUNT(*) AS count
          FROM expenses e JOIN categories c ON c.id = e.category_id
-         WHERE substr(e.expense_date, 1, 7) = ?
+         WHERE e.user_id = ? AND substr(e.expense_date, 1, 7) = ?
          GROUP BY c.id ORDER BY total DESC`
       )
-      .all(month);
+      .all(userId, month);
     const total = Math.round(byCategory.reduce((s, r) => s + r.total, 0) * 100) / 100;
     return { month, total, count: byCategory.reduce((s, r) => s + r.count, 0), byCategory };
   }
@@ -84,7 +106,21 @@ function createRepo(db) {
     db.prepare(`DELETE FROM categories WHERE name NOT IN (${marks})`).run(...DEFAULT_CATEGORIES);
   }
 
-  return { getExpense, listExpenses, createExpense, updateExpense, deleteExpense, listCategories, categoryExists, createCategory, summary, reset };
+  return {
+    createUser,
+    findUserByEmail,
+    findUserById,
+    getExpense,
+    listExpenses,
+    createExpense,
+    updateExpense,
+    deleteExpense,
+    listCategories,
+    categoryExists,
+    createCategory,
+    summary,
+    reset,
+  };
 }
 
 module.exports = { createRepo };
