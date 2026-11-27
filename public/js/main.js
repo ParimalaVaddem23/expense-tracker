@@ -7,8 +7,19 @@ function localDate(d = new Date()) {
 }
 
 async function api(path, options = {}) {
-  const res = await fetch(`/api${path}`, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const res = await fetch(`/api${path}`, {
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+
+  if (res.status === 401) {
+    window.location.assign('/login.html');
+    throw new Error('Unauthorized');
+  }
+
   if (res.status === 204) return null;
+
   const data = await res.json();
   if (!res.ok) throw data;
   return data;
@@ -146,6 +157,22 @@ async function removeExpense(id) {
 }
 
 async function init() {
+  // Auth: verify session and populate user UI
+  const me = await api('/auth/me');
+  const emailEl = $('user-email');
+  if (emailEl) emailEl.textContent = me.email;
+
+  const logoutBtn = $('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.onclick = async () => {
+      try {
+        await api('/auth/logout', { method: 'POST' });
+      } finally {
+        window.location.assign('/login.html');
+      }
+    };
+  }
+
   $('month-input').value = localDate().slice(0, 7);
   await loadCategories();
   resetForm();
@@ -164,4 +191,8 @@ async function init() {
   document.body.dataset.ready = 'true';
 }
 
-init().catch((err) => showError(err));
+init().catch((err) => {
+  // If api() already redirected on 401, avoid flashing an error.
+  if (String(err?.message).toLowerCase().includes('unauthorized')) return;
+  showError(err);
+});
