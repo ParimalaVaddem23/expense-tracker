@@ -47,7 +47,7 @@ function clearAuthCookie(req, res) {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    maxAge: 0,
+    maxAge: 0, // Max-Age=0 to clear cookie; keep other attributes consistent with setAuthCookie
     secure: req.secure === true,
   });
 }
