@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
 const openapi = require('./openapi');
 const { createRouter } = require('./routes');
@@ -7,6 +8,7 @@ const { createRouter } = require('./routes');
 function createApp(repo) {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
   app.use(express.static(path.join(__dirname, '..', 'public')));
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapi));
   app.use('/api', createRouter(repo));
