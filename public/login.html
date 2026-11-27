@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login — Expense Tracker</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <main class="auth">
+      <h1 data-testid="auth-title">Log in</h1>
+
+      <div class="notice" data-testid="auth-success" hidden></div>
+      <div class="error" data-testid="auth-error" hidden></div>
+
+      <form id="auth-form">
+        <label>
+          Email
+          <input type="email" autocomplete="email" data-testid="email-input" required />
+        </label>
+        <label>
+          Password
+          <input type="password" autocomplete="current-password" data-testid="password-input" required minlength="8" />
+        </label>
+
+        <div class="auth__actions">
+          <button type="submit" data-testid="login-btn">Log in</button>
+          <button type="submit" data-testid="register-btn" hidden>Create account</button>
+          <button type="button" class="link" data-testid="toggle-mode-btn">Create an account</button>
+        </div>
+      </form>
+    </main>
+
+    <script src="/js/login.js"></script>
+  </body>
+</html>
