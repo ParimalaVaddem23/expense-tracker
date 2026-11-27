@@ -39,4 +39,22 @@ const summaryQuerySchema = z.object({
   month: z.string({ required_error: 'month is required (YYYY-MM)' }).regex(/^\d{4}-\d{2}$/, 'month must be YYYY-MM'),
 });
 
-module.exports = { expenseSchema, categorySchema, listQuerySchema, summaryQuerySchema };
+const registerSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required', invalid_type_error: 'Email is required' })
+    .email('Email must be a valid email'),
+  password: z
+    .string({ required_error: 'Password is required', invalid_type_error: 'Password is required' })
+    .min(8, 'Password must be at least 8 characters'),
+});
+
+const loginSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required', invalid_type_error: 'Email is required' })
+    .email('Email must be a valid email'),
+  password: z
+    .string({ required_error: 'Password is required', invalid_type_error: 'Password is required' })
+    .min(8, 'Password must be at least 8 characters'),
+});
+
+module.exports = { expenseSchema, categorySchema, listQuerySchema, summaryQuerySchema, registerSchema, loginSchema };
