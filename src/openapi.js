@@ -60,7 +60,6 @@ module.exports = {
     '/api/auth/logout': {
       post: {
         summary: 'Logout',
-        security: [{ cookieAuth: [] }],
         responses: {
           204: {
             description: 'Logged out',
@@ -71,7 +70,6 @@ module.exports = {
               },
             },
           },
-          401: err('Unauthorized'),
         },
       },
     },
@@ -179,9 +177,8 @@ module.exports = {
         properties: {
           id: { type: 'integer', example: 1 },
           email: { type: 'string', format: 'email', example: 'user@example.com' },
-          name: { type: 'string', example: 'Alex' },
-          createdAt: { type: 'string', format: 'date-time', example: '2026-11-20T12:34:56.000Z' },
         },
+        additionalProperties: false,
       },
       Error: {
         type: 'object',
@@ -190,6 +187,7 @@ module.exports = {
           message: { type: 'string' },
           details: { type: 'array', items: { type: 'object', properties: { field: { type: 'string' }, message: { type: 'string' } } } },
         },
+        additionalProperties: true,
       },
     },
   },
