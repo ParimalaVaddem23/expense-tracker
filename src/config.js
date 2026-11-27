@@ -7,6 +7,12 @@ function getConfigFromEnv(env = process.env) {
 }
 
 function validateConfig(config) {
+  if (!config || typeof config !== 'object') {
+    const err = new TypeError('config must be an object');
+    err.code = 'CONFIG_INVALID';
+    throw err;
+  }
+
   if (!config.JWT_SECRET || String(config.JWT_SECRET).length < 32) {
     const err = new Error('JWT_SECRET is required and must be at least 32 characters');
     err.code = 'CONFIG_INVALID';
