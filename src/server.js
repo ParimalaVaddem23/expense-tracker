@@ -3,9 +3,13 @@ const path = require('path');
 const { createDb } = require('./db');
 const { createRepo } = require('./repo');
 const { createApp } = require('./app');
+const { config, validateConfig } = require('./config');
+
+validateConfig();
 
 const PORT = Number(process.env.PORT) || 3000;
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'expenses.db');
+const DB_PATH =
+  config.DB_PATH || process.env.DB_PATH || path.join(__dirname, '..', 'data', 'expenses.db');
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 const app = createApp(createRepo(createDb(DB_PATH)));
